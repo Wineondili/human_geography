@@ -29,6 +29,36 @@
   }
 }
 
+@keyframes successGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(103, 217, 162, 0.35);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgba(103, 217, 162, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(103, 217, 162, 0);
+  }
+}
+
+@keyframes failShake {
+  0% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px);
+  }
+  45% {
+    transform: translateX(5px);
+  }
+  70% {
+    transform: translateX(-3px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
 .stage-panel::after {
   content: '';
   position: absolute;
@@ -48,10 +78,20 @@
   animation: shimmer 4s ease-in-out infinite;
 }
 
+.flashcard-stage.fx-known {
+  animation: successGlow 360ms ease-out;
+}
+
+.flashcard-stage.fx-unknown {
+  animation: failShake 320ms ease;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .stage-panel::after,
   .stat-tile,
-  .hero-chip {
+  .hero-chip,
+  .flashcard-stage.fx-known,
+  .flashcard-stage.fx-unknown {
     animation: none !important;
   }
 }

@@ -24,14 +24,14 @@ function StatsRibbon({
   const animated = motionLevel === 'full'
 
   const items = [
-    { label: '复习率', value: `${reviewedRate}%` },
-    { label: '掌握率', value: `${masteryRate}%` },
-    { label: '连对', value: String(progress.streak) },
-    { label: '测验正确率', value: `${quizAccuracy}%` },
-    { label: '总答对', value: String(progress.correct) },
-    { label: '总答错', value: String(progress.wrong) },
-    { label: '测验答对', value: String(quizCorrect) },
-    { label: '测验答错', value: String(quizWrong) },
+    { id: 'reviewed', label: '复习率', value: `${reviewedRate}%` },
+    { id: 'mastery', label: '掌握率', value: `${masteryRate}%` },
+    { id: 'streak', label: '连对', value: String(progress.streak) },
+    { id: 'accuracy', label: '测验正确率', value: `${quizAccuracy}%` },
+    { id: 'correct-all', label: '总答对', value: String(progress.correct) },
+    { id: 'wrong-all', label: '总答错', value: String(progress.wrong) },
+    { id: 'correct-quiz', label: '测验答对', value: String(quizCorrect) },
+    { id: 'wrong-quiz', label: '测验答错', value: String(quizWrong) },
   ]
 
   return (
@@ -43,14 +43,25 @@ function StatsRibbon({
     >
       {items.map((item, idx) => (
         <motion.article
-          key={`${item.label}-${idx}`}
-          className="stat-tile"
+          key={`${item.id}-${idx}`}
+          className={item.id === 'streak' ? 'stat-tile streak-tile' : 'stat-tile'}
           initial={animated ? { opacity: 0, y: 12 } : false}
           animate={animated ? { opacity: 1, y: 0 } : undefined}
           transition={{ delay: 0.16 + idx * 0.035, duration: 0.4 }}
         >
           <span>{item.label}</span>
-          <strong>{item.value}</strong>
+          {item.id === 'streak' && animated ? (
+            <motion.strong
+              key={`streak-${item.value}`}
+              initial={{ scale: 0.6, opacity: 0.5 }}
+              animate={{ scale: [1, 1.32, 1], opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 280, damping: 15 }}
+            >
+              {item.value}
+            </motion.strong>
+          ) : (
+            <strong>{item.value}</strong>
+          )}
         </motion.article>
       ))}
     </motion.section>
