@@ -1,0 +1,29 @@
+# OS / editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Logs and env
+*.log
+.env
+.env.*
+
+# Language / tool artifacts
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+.Python
+.venv/
+venv/
+build/
+dist/
+coverage/
+*.class
+*.jar
+
+target/
