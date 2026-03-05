@@ -1,30 +1,35 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import './App.css'
-import type { Direction, ProgressRecord, VocabItem } from './types/vocab'
-import { STORAGE_KEY } from './types/vocab'
-import { createQuizQuestion, getPromptAndAnswer, makeVocabKey, shuffleItems } from './lib/vocab'
+import { useReducedMotion } from 'framer-motion'
+import AnimatedBackdrop from './components/AnimatedBackdrop'
+import FlashcardStage from './components/FlashcardStage'
+import HeaderHero from './components/HeaderHero'
+import ModeTabs from './components/ModeTabs'
+import QuizStage from './components/QuizStage'
+import StatsRibbon from './components/StatsRibbon'
+import { createQuizQuestion, makeVocabKey, shuffleItems } from './lib/vocab'
 import { getInitialProgress, getMasteryRate, getReviewedRate, recordAttempt, saveProgress } from './lib/storage'
-import type { QuizQuestion as QuizQuestionType } from './lib/vocab'
-
-type AppMode = 'flashcard' | 'quiz'
-
-type QuizState = QuizQuestionType & {
-  answeredIndex: number | null
-  isCorrect: boolean | null
-}
+import type { QuizFeedback, QuizQuestionState } from './types/quiz'
+import type { MotionLevel, UiState } from './types/ui'
+import { STORAGE_KEY } from './types/vocab'
+import type { Direction, ProgressRecord, VocabItem } from './types/vocab'
 
 function App() {
-  const [mode, setMode] = useState<AppMode>('flashcard')
+  const prefersReducedMotion = useReducedMotion()
+  const motionLevel: MotionLevel = prefersReducedMotion ? 'reduced' : 'full'
+
+  const [mode, setMode] = useState<UiState['mode']>('flashcard')
   const [deck, setDeck] = useState<VocabItem[]>([])
   const [index, setIndex] = useState(0)
   const [showAnswer, setShowAnswer] = useState(false)
   const [direction, setDirection] = useState<Direction>('enToCn')
   const [progress, setProgress] = useState<ProgressRecord>(() => getInitialProgress())
-  const [quizQuestion, setQuizQuestion] = useState<QuizState | null>(null)
+  const [quizQuestion, setQuizQuestion] = useState<QuizQuestionState | null>(null)
   const [quizCorrect, setQuizCorrect] = useState(0)
   const [quizWrong, setQuizWrong] = useState(0)
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [errorMessage, setErrorMessage] = useState('')
+
+  const uiState = useMemo<UiState>(() => ({ mode, motionLevel }), [mode, motionLevel])
 
   useEffect(() => {
     let cancelled = false
@@ -80,21 +85,20 @@ function App() {
   }, [])
 
   const keys = useMemo(() => deck.map((item) => makeVocabKey(item)), [deck])
-  const totalWords = deck.length
   const current = deck[index]
-  const { prompt, answer, promptLabel, answerLabel } =
-    current ? getPromptAndAnswer(current, direction) : { prompt: '', answer: '', promptLabel: '', answerLabel: '' }
+  const totalWords = deck.length
 
   const masteryRate = getMasteryRate(progress, keys)
   const reviewedRate = getReviewedRate(progress, keys)
+  const quizAccuracy = useMemo(() => {
+    const total = quizCorrect + quizWrong
+    return total ? Math.round((quizCorrect / total) * 100) : 0
+  }, [quizCorrect, quizWrong])
 
-  const persistProgress = useCallback(
-    (nextProgress: ProgressRecord) => {
-      setProgress(nextProgress)
-      saveProgress(nextProgress)
-    },
-    [],
-  )
+  const persistProgress = useCallback((nextProgress: ProgressRecord) => {
+    setProgress(nextProgress)
+    saveProgress(nextProgress)
+  }, [])
 
   const moveNext = useCallback(() => {
     if (!deck.length) {
@@ -102,13 +106,13 @@ function App() {
     }
 
     setShowAnswer(false)
-    setIndex((prevIndex) => {
-      const atEnd = prevIndex >= deck.length - 1
+    setIndex((prev) => {
+      const atEnd = prev >= deck.length - 1
       if (atEnd) {
         setDeck((currentDeck) => shuffleItems(currentDeck))
         return 0
       }
-      return prevIndex + 1
+      return prev + 1
     })
   }, [deck.length])
 
@@ -125,23 +129,6 @@ function App() {
     setShowAnswer(true)
   }, [])
 
-  const handleRemember = useCallback(
-    (known: boolean) => {
-      if (!current) {
-        return
-      }
-
-      const key = makeVocabKey(current)
-      setProgress((previousProgress) => {
-        const next = recordAttempt(previousProgress, key, known)
-        persistProgress(next)
-        return next
-      })
-      moveNext()
-    },
-    [current, moveNext, persistProgress],
-  )
-
   const switchDirection = useCallback(() => {
     setDirection((prev) => (prev === 'enToCn' ? 'cnToEn' : 'enToCn'))
     setShowAnswer(false)
@@ -157,15 +144,26 @@ function App() {
     setQuizQuestion({ ...next, answeredIndex: null, isCorrect: null })
   }, [deck, direction])
 
-  useEffect(() => {
-    if (status === 'ready' && mode === 'quiz') {
-      resetQuiz()
-    }
-  }, [mode, resetQuiz, status])
+  const handleRemember = useCallback(
+    (known: boolean) => {
+      if (!current) {
+        return
+      }
+
+      const key = makeVocabKey(current)
+      setProgress((previous) => {
+        const next = recordAttempt(previous, key, known)
+        persistProgress(next)
+        return next
+      })
+      moveNext()
+    },
+    [current, moveNext, persistProgress],
+  )
 
   const handleQuizAnswer = useCallback(
     (option: string, optionIndex: number) => {
-      if (!quizQuestion || quizQuestion.answeredIndex !== null || !quizQuestion.answer) {
+      if (!quizQuestion || quizQuestion.answeredIndex !== null) {
         return
       }
 
@@ -184,8 +182,8 @@ function App() {
       setQuizWrong((count) => (correct ? count : count + 1))
 
       const key = makeVocabKey(quizQuestion.word)
-      setProgress((previousProgress) => {
-        const next = recordAttempt(previousProgress, key, correct)
+      setProgress((previous) => {
+        const next = recordAttempt(previous, key, correct)
         persistProgress(next)
         return next
       })
@@ -197,24 +195,33 @@ function App() {
     resetQuiz()
   }, [resetQuiz])
 
-  const quizAccuracy = useMemo(() => {
-    const total = quizCorrect + quizWrong
-    return total === 0 ? 0 : Math.round((quizCorrect / total) * 100)
-  }, [quizCorrect, quizWrong])
+  const feedbackState: QuizFeedback = useMemo(() => {
+    if (!quizQuestion || quizQuestion.answeredIndex === null) {
+      return 'idle'
+    }
+
+    return quizQuestion.isCorrect ? 'correct' : 'wrong'
+  }, [quizQuestion])
+
+  useEffect(() => {
+    if (status === 'ready' && mode === 'quiz') {
+      resetQuiz()
+    }
+  }, [mode, resetQuiz, status])
 
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
+      const tag = (event.target as HTMLElement)?.tagName?.toLowerCase()
+      if (tag === 'input' || tag === 'textarea') {
+        return
+      }
+
       if (event.key === 'r' || event.key === 'R') {
         switchDirection()
         return
       }
 
       if (mode === 'flashcard') {
-        const tag = (event.target as HTMLElement)?.tagName?.toLowerCase()
-        if (tag === 'input' || tag === 'textarea') {
-          return
-        }
-
         if (event.key === ' ') {
           event.preventDefault()
           if (!showAnswer) {
@@ -245,9 +252,9 @@ function App() {
       }
 
       if (event.key >= '1' && event.key <= '4' && quizQuestion.answeredIndex === null) {
-        const index = Number(event.key) - 1
-        if (quizQuestion.options[index] !== undefined) {
-          handleQuizAnswer(quizQuestion.options[index], index)
+        const optionIndex = Number(event.key) - 1
+        if (quizQuestion.options[optionIndex] !== undefined) {
+          handleQuizAnswer(quizQuestion.options[optionIndex], optionIndex)
         }
         return
       }
@@ -263,86 +270,25 @@ function App() {
       window.removeEventListener('keydown', handler)
     }
   }, [
-    handleRemember,
     handleQuizAnswer,
+    handleRemember,
     mode,
     moveNext,
     movePrev,
     nextQuizQuestion,
+    quizQuestion,
     reveal,
     showAnswer,
     switchDirection,
-    quizQuestion,
-    status,
   ])
-
-  const renderQuizCard = () => {
-    if (!quizQuestion) {
-      return <section className="card">当前词量不足，无法开始测验。</section>
-    }
-
-    const disabled = quizQuestion.answeredIndex !== null
-
-    return (
-      <section className="card" aria-live="polite">
-        <div className="labels">
-          <span>{quizQuestion.promptLabel}</span>
-          <span>测验模式（按数字键 1-4）</span>
-        </div>
-        <h2>{quizQuestion.prompt}</h2>
-
-        <div className="options">
-          {quizQuestion.options.map((item, optionIndex) => {
-            const selected = quizQuestion.answeredIndex === optionIndex
-            const className =
-              quizQuestion.answeredIndex === null
-                ? 'option'
-                : quizQuestion.isCorrect
-                  ? item === quizQuestion.answer
-                    ? 'option correct'
-                    : selected
-                      ? 'option wrong'
-                      : 'option'
-                  : item === quizQuestion.answer
-                    ? 'option correct'
-                    : selected
-                      ? 'option wrong'
-                      : 'option'
-
-            return (
-              <button
-                key={`${quizQuestion.answer}-${optionIndex}`}
-                onClick={() => handleQuizAnswer(item, optionIndex)}
-                type="button"
-                className={className}
-                disabled={disabled}
-              >
-                {`${optionIndex + 1}. ${item}`}
-              </button>
-            )
-          })}
-        </div>
-
-        {quizQuestion.answeredIndex !== null ? (
-          <div className="actions">
-            {quizQuestion.isCorrect ? (
-              <p className="feedback success">答对了！</p>
-            ) : (
-              <p className="feedback error">答错了，正确答案是：{quizQuestion.answer}</p>
-            )}
-            <button onClick={nextQuizQuestion} type="button" className="primary">
-              下一题（空格/回车）
-            </button>
-          </div>
-        ) : null}
-      </section>
-    )
-  }
 
   if (status === 'loading') {
     return (
       <main className="app-shell">
-        <p>正在加载词表……</p>
+        <AnimatedBackdrop motionLevel={motionLevel} />
+        <div className="app-content">
+          <section className="empty-state">正在加载词表……</section>
+        </div>
       </main>
     )
   }
@@ -350,88 +296,57 @@ function App() {
   if (status === 'error' || !current) {
     return (
       <main className="app-shell">
-        <p>{errorMessage || '当前暂无词条。'}</p>
+        <AnimatedBackdrop motionLevel={motionLevel} />
+        <div className="app-content">
+          <section className="empty-state">{errorMessage || '当前暂无词条。'}</section>
+        </div>
       </main>
     )
   }
 
   return (
     <main className="app-shell">
-      <header className="top-bar">
-        <h1>人文地理 Chapter 1 背诵</h1>
-        <p>词汇总数：{totalWords}</p>
-      </header>
+      <AnimatedBackdrop motionLevel={motionLevel} />
 
-      <section className="mode-switch" aria-label="学习模式">
-        <button
-          onClick={() => setMode('flashcard')}
-          type="button"
-          className={mode === 'flashcard' ? 'primary' : ''}
-        >
-          卡片学习
-        </button>
-        <button onClick={() => setMode('quiz')} type="button" className={mode === 'quiz' ? 'primary' : ''}>
-          选择题测验
-        </button>
-      </section>
+      <div className="app-content">
+        <HeaderHero totalWords={totalWords} motionLevel={motionLevel} />
 
-      <section className="stats">
-        <p>
-          已学习词数：{Object.keys(progress.mastery).length} · 已复习率：{reviewedRate}%
-        </p>
-        <p>
-          答对：{progress.correct} · 答错：{progress.wrong} · 连续答对：{progress.streak}
-        </p>
-        <p>掌握率（≥3次记忆标记）：{masteryRate}%</p>
-        <p>
-          测验成绩：{quizCorrect + quizWrong} 题 · 答对 {quizCorrect} · 答错 {quizWrong} · 正确率：{quizAccuracy}%
-        </p>
-      </section>
+        <ModeTabs uiState={uiState} onModeChange={setMode} />
 
-      {mode === 'flashcard' ? (
-        <section className="card" aria-live="polite">
-          <div className="labels">
-            <span>{promptLabel}</span>
-            <button onClick={switchDirection} type="button">
-              切换方向（R）
-            </button>
-          </div>
-          <h2>{prompt}</h2>
-          {showAnswer ? <p className="answer">{answerLabel}：{answer}</p> : null}
+        <StatsRibbon
+          progress={progress}
+          reviewedRate={reviewedRate}
+          masteryRate={masteryRate}
+          quizAccuracy={quizAccuracy}
+          quizCorrect={quizCorrect}
+          quizWrong={quizWrong}
+          motionLevel={motionLevel}
+        />
 
-          <div className="actions">
-            {!showAnswer ? (
-              <button onClick={reveal} type="button" className="primary">
-                显示答案（空格）
-              </button>
-            ) : (
-              <>
-                <button onClick={() => handleRemember(true)} type="button" className="primary">
-                  认识（1 / 空格）
-                </button>
-                <button onClick={() => handleRemember(false)} type="button">
-                  未记住（2）
-                </button>
-              </>
-            )}
-          </div>
-        </section>
-      ) : null}
+        {mode === 'flashcard' ? (
+          <FlashcardStage
+            current={current}
+            direction={direction}
+            showAnswer={showAnswer}
+            onReveal={reveal}
+            onRemember={handleRemember}
+            onPrev={movePrev}
+            onNext={moveNext}
+            onSwitchDirection={switchDirection}
+            motionLevel={motionLevel}
+          />
+        ) : (
+          <QuizStage
+            question={quizQuestion}
+            onAnswer={handleQuizAnswer}
+            onNext={nextQuizQuestion}
+            feedbackState={feedbackState}
+            motionLevel={motionLevel}
+          />
+        )}
 
-      {mode === 'quiz' ? renderQuizCard() : null}
-
-      {mode === 'flashcard' ? (
-        <section className="footer-actions">
-          <button onClick={movePrev} type="button" className="ghost">
-            上一条（←）
-          </button>
-          <button onClick={moveNext} type="button" className="ghost">
-            下一条（→）
-          </button>
-        </section>
-      ) : null}
-
-      <p className="hint">当前进度（localStorage key: {STORAGE_KEY}）</p>
+        <p className="app-hint">当前进度（localStorage key: {STORAGE_KEY}）</p>
+      </div>
     </main>
   )
 }

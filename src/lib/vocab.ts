@@ -1,13 +1,5 @@
 import type { Direction, VocabItem } from '../types/vocab'
-
-export interface QuizQuestion {
-  word: VocabItem
-  prompt: string
-  answer: string
-  promptLabel: string
-  answerLabel: string
-  options: string[]
-}
+import type { QuizQuestion } from '../types/quiz'
 
 export const makeVocabKey = (item: { en: string; cn: string }): string => `${item.en}||${item.cn}`
 

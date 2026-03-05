@@ -1,0 +1,6 @@
+export type MotionLevel = 'full' | 'reduced'
+
+export interface UiState {
+  mode: 'flashcard' | 'quiz'
+  motionLevel: MotionLevel
+}

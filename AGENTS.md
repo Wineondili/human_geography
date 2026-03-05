@@ -12,3 +12,4 @@
 - 2026-03-05 15:26:18 +0800: Implemented flashcard study flow, direction switching, keyboard controls, and localStorage-backed progress persistence.
 - 2026-03-05 15:27:32 +0800: Added quiz mode (4-option mode-switch questions), quiz scoring, and expanded study statistics UI; added dedicated quiz vocab helpers and styling.
 - 2026-03-05 15:27:46 +0800: Added README docs, updated npm lint to type-check (tsc --noEmit), and verified build/lint pass.
+- 2026-03-05 16:04:33 +0800: Introduced motion infrastructure with framer-motion, modularized UI shell components, and split visual styles into tokens/layout/motion layers.

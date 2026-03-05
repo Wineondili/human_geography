@@ -1,0 +1,57 @@
+@keyframes sheenMove {
+  0% {
+    transform: translateX(-120%) rotate(8deg);
+  }
+  100% {
+    transform: translateX(220%) rotate(8deg);
+  }
+}
+
+@keyframes tilePulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(114, 182, 255, 0.12);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(114, 182, 255, 0.02);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0.35;
+  }
+}
+
+.stage-panel::after {
+  content: '';
+  position: absolute;
+  inset: -40% auto -40% -35%;
+  width: 42%;
+  background: linear-gradient(110deg, transparent 0%, rgba(255, 255, 255, 0.13) 50%, transparent 100%);
+  pointer-events: none;
+  animation: sheenMove 5.4s linear infinite;
+  opacity: 0.6;
+}
+
+.stat-tile {
+  animation: tilePulse 5.2s ease-in-out infinite;
+}
+
+.hero-chip {
+  animation: shimmer 4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage-panel::after,
+  .stat-tile,
+  .hero-chip {
+    animation: none !important;
+  }
+}
