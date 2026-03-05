@@ -356,6 +356,11 @@ button {
   gap: 0.52rem;
 }
 
+.quiz-content {
+  display: grid;
+  gap: var(--spacing-md);
+}
+
 .quiz-option {
   border: 1px solid rgba(255, 255, 255, 0.24);
   border-radius: var(--radius-md);
@@ -368,6 +373,11 @@ button {
 
 .quiz-option:disabled {
   cursor: not-allowed;
+}
+
+.quiz-option.selected {
+  outline: 1px solid rgba(255, 255, 255, 0.35);
+  outline-offset: 1px;
 }
 
 .quiz-option.right {
@@ -385,11 +395,32 @@ button {
   border-radius: var(--radius-md);
   padding: 0.6rem 0.74rem;
   background: rgba(255, 255, 255, 0.08);
+  align-items: center;
 }
 
 .quiz-feedback p {
   margin: 0;
   font-weight: 600;
+}
+
+.feedback-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: grid;
+  place-content: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.feedback-icon.ok {
+  background: rgba(103, 217, 162, 0.2);
+  color: #9ef0c7;
+}
+
+.feedback-icon.bad {
+  background: rgba(255, 139, 139, 0.2);
+  color: #ffc1c1;
 }
 
 .quiz-feedback.ok {

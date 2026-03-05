@@ -59,6 +59,36 @@
   }
 }
 
+@keyframes optionPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(103, 217, 162, 0.45);
+  }
+  75% {
+    box-shadow: 0 0 0 14px rgba(103, 217, 162, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(103, 217, 162, 0);
+  }
+}
+
+@keyframes optionShake {
+  0% {
+    transform: translateX(0);
+  }
+  22% {
+    transform: translateX(-5px);
+  }
+  45% {
+    transform: translateX(5px);
+  }
+  70% {
+    transform: translateX(-3px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
 .stage-panel::after {
   content: '';
   position: absolute;
@@ -86,12 +116,22 @@
   animation: failShake 320ms ease;
 }
 
+.quiz-option.pulse {
+  animation: optionPulse 420ms ease-out;
+}
+
+.quiz-option.shake {
+  animation: optionShake 300ms ease;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .stage-panel::after,
   .stat-tile,
   .hero-chip,
   .flashcard-stage.fx-known,
-  .flashcard-stage.fx-unknown {
+  .flashcard-stage.fx-unknown,
+  .quiz-option.pulse,
+  .quiz-option.shake {
     animation: none !important;
   }
 }
