@@ -15,3 +15,4 @@
 - 2026-03-05 16:04:33 +0800: Introduced motion infrastructure with framer-motion, modularized UI shell components, and split visual styles into tokens/layout/motion layers.
 - 2026-03-05 16:06:35 +0800: Upgraded flashcard stage with 3D flip reveal, horizontal card transitions, pointer tilt, tactile button feedback, and animated streak tile updates.
 - 2026-03-05 16:08:18 +0800: Animated quiz flow with staged prompt/options transitions, feedback icon rhythm, and tweened accuracy counter updates.
+- 2026-03-05 16:09:13 +0800: Added motion-reduced guards, will-change performance hints, and refreshed README with visual theme, shortcuts, and accessibility notes.

@@ -40,7 +40,8 @@ button {
   aspect-ratio: 1;
   border-radius: 50%;
   opacity: 0.38;
-  filter: blur(7px);
+  filter: blur(6px);
+  will-change: transform;
 }
 
 .orb-1 {

@@ -98,6 +98,7 @@
   pointer-events: none;
   animation: sheenMove 5.4s linear infinite;
   opacity: 0.6;
+  will-change: transform;
 }
 
 .stat-tile {
@@ -122,6 +123,21 @@
 
 .quiz-option.shake {
   animation: optionShake 300ms ease;
+}
+
+.motion-reduced .stage-panel::after,
+.motion-reduced .stat-tile,
+.motion-reduced .hero-chip,
+.motion-reduced .flashcard-stage.fx-known,
+.motion-reduced .flashcard-stage.fx-unknown,
+.motion-reduced .quiz-option.pulse,
+.motion-reduced .quiz-option.shake {
+  animation: none !important;
+}
+
+.motion-reduced .orb {
+  filter: none;
+  opacity: 0.22;
 }
 
 @media (prefers-reduced-motion: reduce) {

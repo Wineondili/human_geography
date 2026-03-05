@@ -284,7 +284,7 @@ function App() {
 
   if (status === 'loading') {
     return (
-      <main className="app-shell">
+      <main className={`app-shell motion-${motionLevel}`}>
         <AnimatedBackdrop motionLevel={motionLevel} />
         <div className="app-content">
           <section className="empty-state">正在加载词表……</section>
@@ -295,7 +295,7 @@ function App() {
 
   if (status === 'error' || !current) {
     return (
-      <main className="app-shell">
+      <main className={`app-shell motion-${motionLevel}`}>
         <AnimatedBackdrop motionLevel={motionLevel} />
         <div className="app-content">
           <section className="empty-state">{errorMessage || '当前暂无词条。'}</section>
@@ -305,7 +305,7 @@ function App() {
   }
 
   return (
-    <main className="app-shell">
+    <main className={`app-shell motion-${motionLevel}`}>
       <AnimatedBackdrop motionLevel={motionLevel} />
 
       <div className="app-content">
