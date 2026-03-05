@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "vite lint"
+    "lint": "tsc --noEmit"
   },
   "dependencies": {
     "react": "^19.1.0",
