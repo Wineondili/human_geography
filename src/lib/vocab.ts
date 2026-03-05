@@ -1,3 +1,14 @@
+import type { Direction, VocabItem } from '../types/vocab'
+
+export interface QuizQuestion {
+  word: VocabItem
+  prompt: string
+  answer: string
+  promptLabel: string
+  answerLabel: string
+  options: string[]
+}
+
 export const makeVocabKey = (item: { en: string; cn: string }): string => `${item.en}||${item.cn}`
 
 export const shuffleItems = <T,>(items: T[]): T[] => {
@@ -11,7 +22,7 @@ export const shuffleItems = <T,>(items: T[]): T[] => {
 
 export const getPromptAndAnswer = (
   item: { en: string; cn: string },
-  direction: 'enToCn' | 'cnToEn',
+  direction: Direction,
 ) => {
   if (direction === 'enToCn') {
     return {
@@ -27,5 +38,29 @@ export const getPromptAndAnswer = (
     answer: item.en,
     promptLabel: '中文 -> 英文',
     answerLabel: '答案（英文）',
+  }
+}
+
+export const createQuizQuestion = (items: VocabItem[], direction: Direction): QuizQuestion | null => {
+  if (items.length < 4) {
+    return null
+  }
+
+  const shuffled = shuffleItems(items)
+  const correctWord = shuffled[0]
+  const base = getPromptAndAnswer(correctWord, direction)
+
+  const answerPool = items
+    .map((item) => (direction === 'enToCn' ? item.cn : item.en))
+    .filter((value) => value !== base.answer)
+
+  const uniqueAnswers = Array.from(new Set(answerPool))
+  const shuffledDistractors = shuffleItems(uniqueAnswers)
+  const options = shuffleItems([base.answer, ...shuffledDistractors.slice(0, 3)])
+
+  return {
+    word: correctWord,
+    ...base,
+    options: options.slice(0, 4),
   }
 }

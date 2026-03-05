@@ -22,6 +22,11 @@
   color: #5a5a64;
 }
 
+.mode-switch {
+  display: flex;
+  gap: 0.75rem;
+}
+
 .stats {
   background: #f4f7ff;
   border: 1px solid #d8e0ff;
@@ -74,6 +79,11 @@ h2 {
   flex-wrap: wrap;
 }
 
+.options {
+  display: grid;
+  gap: 0.55rem;
+}
+
 button {
   border: 1px solid #aeb9dc;
   border-radius: 10px;
@@ -100,6 +110,35 @@ button:hover {
 
 button:active {
   transform: translateY(1px);
+}
+
+button.option {
+  text-align: left;
+}
+
+button.option.correct {
+  border-color: #2e8b57;
+  background: #ecfff2;
+  color: #1f5b37;
+}
+
+button.option.wrong {
+  border-color: #b94a48;
+  background: #fff3f3;
+  color: #8d2f2f;
+}
+
+.feedback {
+  margin: 0.25rem 0 0;
+  font-weight: 600;
+}
+
+.feedback.success {
+  color: #1f5b37;
+}
+
+.feedback.error {
+  color: #8d2f2f;
 }
 
 .hint {
