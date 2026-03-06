@@ -16,3 +16,4 @@
 - 2026-03-05 16:06:35 +0800: Upgraded flashcard stage with 3D flip reveal, horizontal card transitions, pointer tilt, tactile button feedback, and animated streak tile updates.
 - 2026-03-05 16:08:18 +0800: Animated quiz flow with staged prompt/options transitions, feedback icon rhythm, and tweened accuracy counter updates.
 - 2026-03-05 16:09:13 +0800: Added motion-reduced guards, will-change performance hints, and refreshed README with visual theme, shortcuts, and accessibility notes.
+- 2026-03-06 11:14:33 +0800: Added a start gate for manual mode selection and rewrote quiz mode as shuffled typed-answer drills with enter-to-submit retry loops.

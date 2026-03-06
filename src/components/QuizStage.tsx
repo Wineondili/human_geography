@@ -1,40 +1,42 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import type { QuizFeedback, QuizQuestionState } from '../types/quiz'
+import { useEffect, useRef } from 'react'
+import type { QuizFeedback, QuizQuestion } from '../types/quiz'
 import type { MotionLevel } from '../types/ui'
 
 export interface QuizStageProps {
-  question: QuizQuestionState | null
-  onAnswer: (option: string, optionIndex: number) => void
-  onNext: () => void
+  question: QuizQuestion | null
+  inputValue: string
   feedbackState: QuizFeedback
+  revealedAnswer: string | null
+  onInputChange: (value: string) => void
+  onSubmit: () => void
+  onSwitchDirection: () => void
   motionLevel: MotionLevel
 }
 
-const optionContainerVariants = {
-  hidden: { opacity: 0, y: 8 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      staggerChildren: 0.06,
-      delayChildren: 0.08,
-    },
-  },
-}
-
-const optionItemVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0 },
-}
-
-function QuizStage({ question, onAnswer, onNext, feedbackState, motionLevel }: QuizStageProps) {
+function QuizStage({
+  question,
+  inputValue,
+  feedbackState,
+  revealedAnswer,
+  onInputChange,
+  onSubmit,
+  onSwitchDirection,
+  motionLevel,
+}: QuizStageProps) {
   const animated = motionLevel === 'full'
+  const inputRef = useRef<HTMLInputElement | null>(null)
+
+  useEffect(() => {
+    inputRef.current?.focus()
+  }, [feedbackState, question?.prompt])
 
   if (!question) {
-    return <section className="stage-panel quiz-stage">当前词量不足，无法开始测验。</section>
+    return <section className="stage-panel quiz-stage">当前词量不足，无法开始测试。</section>
   }
 
-  const isAnswered = question.answeredIndex !== null
+  const isLocked = feedbackState === 'correct'
+  const inputPlaceholder = question.answerLabel === '答案（中文）' ? '输入中文答案，回车验证' : 'Type the English answer and press Enter'
 
   return (
     <motion.section
@@ -45,12 +47,17 @@ function QuizStage({ question, onAnswer, onNext, feedbackState, motionLevel }: Q
     >
       <div className="stage-head">
         <span className="stage-label">{question.promptLabel}</span>
-        <span className="stage-tip">按 1-4 回答</span>
+        <div className="stage-head-actions">
+          <span className="stage-tip">输入答案后按回车验证</span>
+          <button onClick={onSwitchDirection} type="button" className="text-btn">
+            切换方向（R）
+          </button>
+        </div>
       </div>
 
       <AnimatePresence mode="wait">
         <motion.div
-          key={`quiz-block-${question.prompt}-${question.answer}`}
+          key={`quiz-${question.word.en}-${question.word.cn}-${question.prompt}`}
           className="quiz-content"
           initial={animated ? { opacity: 0, y: 12 } : false}
           animate={animated ? { opacity: 1, y: 0 } : undefined}
@@ -59,73 +66,60 @@ function QuizStage({ question, onAnswer, onNext, feedbackState, motionLevel }: Q
         >
           <h2 className="stage-word">{question.prompt}</h2>
 
-          <motion.div
-            className="quiz-options"
-            variants={animated ? optionContainerVariants : undefined}
-            initial={animated ? 'hidden' : false}
-            animate={animated ? 'visible' : undefined}
+          <form
+            className="quiz-form"
+            onSubmit={(event) => {
+              event.preventDefault()
+              onSubmit()
+            }}
           >
-            {question.options.map((item, optionIndex) => {
-              const selected = question.answeredIndex === optionIndex
-              const isRight = item === question.answer
-              const className = !isAnswered
-                ? 'quiz-option'
-                : isRight
-                  ? 'quiz-option right pulse'
-                  : selected
-                    ? 'quiz-option wrong shake'
-                    : 'quiz-option'
-
-              return (
-                <motion.button
-                  key={`${question.answer}-${optionIndex}`}
-                  onClick={() => onAnswer(item, optionIndex)}
-                  type="button"
-                  className={selected ? `${className} selected` : className}
-                  disabled={isAnswered}
-                  variants={animated ? optionItemVariants : undefined}
-                  whileTap={animated ? { scale: 0.98 } : undefined}
-                >
-                  {`${optionIndex + 1}. ${item}`}
-                </motion.button>
-              )
-            })}
-          </motion.div>
+            <label className="quiz-field">
+              <span>{question.answerLabel}</span>
+              <input
+                ref={inputRef}
+                value={inputValue}
+                onChange={(event) => onInputChange(event.target.value)}
+                className="quiz-input"
+                placeholder={inputPlaceholder}
+                autoComplete="off"
+                autoCapitalize="off"
+                spellCheck={false}
+                disabled={isLocked}
+              />
+            </label>
+            <button type="submit" className="cta-btn" disabled={isLocked}>
+              回车提交
+            </button>
+          </form>
         </motion.div>
       </AnimatePresence>
 
       <AnimatePresence>
-        {isAnswered ? (
+        {feedbackState === 'correct' ? (
           <motion.div
-            className={feedbackState === 'correct' ? 'quiz-feedback ok' : 'quiz-feedback bad'}
+            className="quiz-feedback ok"
             initial={animated ? { opacity: 0, y: 10 } : false}
             animate={animated ? { opacity: 1, y: 0 } : undefined}
             exit={animated ? { opacity: 0, y: -8 } : undefined}
-            transition={{ duration: 0.28 }}
+            transition={{ duration: 0.22 }}
           >
-            <motion.span
-              className={feedbackState === 'correct' ? 'feedback-icon ok' : 'feedback-icon bad'}
-              initial={animated ? { scale: 0.4, rotate: -25 } : false}
-              animate={animated ? { scale: 1, rotate: 0 } : undefined}
-              transition={{ type: 'spring', stiffness: 380, damping: 18 }}
-            >
-              {feedbackState === 'correct' ? '✓' : '✕'}
-            </motion.span>
-            <p>
-              {feedbackState === 'correct'
-                ? '答对了！'
-                : `答错了，正确答案是：${question.answer}`}
-            </p>
-            <motion.button
-              onClick={onNext}
-              type="button"
-              className="cta-btn"
-              initial={animated ? { opacity: 0, scale: 0.92 } : false}
-              animate={animated ? { opacity: 1, scale: 1 } : undefined}
-              transition={{ delay: 0.14, duration: 0.25 }}
-            >
-              下一题（空格 / 回车）
-            </motion.button>
+            <span className="feedback-icon ok">✓</span>
+            <p>正确，正在切换到下一题……</p>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {feedbackState === 'wrong' && revealedAnswer ? (
+          <motion.div
+            className="quiz-feedback bad"
+            initial={animated ? { opacity: 0, y: 10 } : false}
+            animate={animated ? { opacity: 1, y: 0 } : undefined}
+            exit={animated ? { opacity: 0, y: -8 } : undefined}
+            transition={{ duration: 0.22 }}
+          >
+            <span className="feedback-icon bad">!</span>
+            <p>正确答案：{revealedAnswer}</p>
           </motion.div>
         ) : null}
       </AnimatePresence>

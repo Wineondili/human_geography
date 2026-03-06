@@ -131,6 +131,89 @@ button {
   font-size: 0.82rem;
 }
 
+.entry-panel,
+.session-bar {
+  border: 1px solid var(--surface-border);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03));
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(8px);
+}
+
+.entry-panel {
+  border-radius: var(--radius-xl);
+  padding: 1.2rem 1.25rem;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.entry-kicker {
+  margin: 0;
+  color: var(--text-subtle);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+
+.entry-title {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+.entry-copy {
+  margin: 0;
+  max-width: 56ch;
+  color: var(--text-subtle);
+}
+
+.entry-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.entry-card {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-main);
+  text-align: left;
+  padding: 1rem;
+  display: grid;
+  gap: 0.38rem;
+  cursor: pointer;
+}
+
+.entry-card span {
+  color: var(--text-subtle);
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.entry-card strong {
+  font-size: 1.15rem;
+}
+
+.entry-card p {
+  margin: 0;
+  color: var(--text-subtle);
+  line-height: 1.45;
+}
+
+.session-bar {
+  border-radius: 999px;
+  padding: 0.45rem 0.52rem 0.45rem 0.8rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.session-badge {
+  color: var(--text-subtle);
+  font-size: 0.9rem;
+}
+
 .mode-tabs {
   position: relative;
   display: grid;
@@ -220,6 +303,14 @@ button {
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
+}
+
+.stage-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .stage-label {
@@ -362,6 +453,41 @@ button {
   gap: var(--spacing-md);
 }
 
+.quiz-form {
+  display: grid;
+  gap: 0.72rem;
+}
+
+.quiz-field {
+  display: grid;
+  gap: 0.42rem;
+}
+
+.quiz-field span {
+  color: var(--text-subtle);
+  font-size: 0.86rem;
+}
+
+.quiz-input {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: var(--radius-md);
+  background: rgba(6, 12, 20, 0.44);
+  color: var(--text-main);
+  padding: 0.78rem 0.88rem;
+  outline: 0;
+  transition: border-color var(--dur-fast) ease, box-shadow var(--dur-fast) ease;
+}
+
+.quiz-input:focus {
+  border-color: rgba(114, 182, 255, 0.9);
+  box-shadow: 0 0 0 3px rgba(114, 182, 255, 0.14);
+}
+
+.quiz-input::placeholder {
+  color: rgba(239, 244, 255, 0.38);
+}
+
 .quiz-option {
   border: 1px solid rgba(255, 255, 255, 0.24);
   border-radius: var(--radius-md);
@@ -450,6 +576,10 @@ button {
   .stats-ribbon {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .entry-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 520px) {
@@ -458,6 +588,7 @@ button {
   }
 
   .hero-panel,
+  .entry-panel,
   .stage-panel {
     border-radius: 18px;
     padding: 0.92rem;
@@ -474,10 +605,18 @@ button {
     grid-template-columns: 1fr;
   }
 
+  .session-bar {
+    border-radius: 18px;
+    padding: 0.75rem 0.92rem;
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
   .cta-btn,
   .ghost-btn,
   .quiz-option,
-  .tab-btn {
+  .tab-btn,
+  .entry-card {
     width: 100%;
   }
 

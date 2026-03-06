@@ -33,26 +33,13 @@ export const getPromptAndAnswer = (
   }
 }
 
-export const createQuizQuestion = (items: VocabItem[], direction: Direction): QuizQuestion | null => {
-  if (items.length < 4) {
-    return null
-  }
-
-  const shuffled = shuffleItems(items)
-  const correctWord = shuffled[0]
-  const base = getPromptAndAnswer(correctWord, direction)
-
-  const answerPool = items
-    .map((item) => (direction === 'enToCn' ? item.cn : item.en))
-    .filter((value) => value !== base.answer)
-
-  const uniqueAnswers = Array.from(new Set(answerPool))
-  const shuffledDistractors = shuffleItems(uniqueAnswers)
-  const options = shuffleItems([base.answer, ...shuffledDistractors.slice(0, 3)])
-
+export const createQuizQuestion = (item: VocabItem, direction: Direction): QuizQuestion => {
   return {
-    word: correctWord,
-    ...base,
-    options: options.slice(0, 4),
+    word: item,
+    ...getPromptAndAnswer(item, direction),
   }
+}
+
+export const normalizeAnswer = (value: string): string => {
+  return value.replace(/\u3000/g, ' ').trim().replace(/\s+/g, ' ').toLowerCase()
 }
