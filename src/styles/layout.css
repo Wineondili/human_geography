@@ -185,7 +185,7 @@ button {
 
 .entry-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.8rem;
 }
 
@@ -636,6 +636,67 @@ button {
   border-color: rgba(255, 139, 139, 0.7);
 }
 
+.overview-stage {
+  gap: 0.9rem;
+}
+
+.overview-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.overview-count {
+  color: var(--text-subtle);
+  font-size: 0.84rem;
+}
+
+.overview-scroll {
+  max-height: min(70vh, 820px);
+  overflow-y: auto;
+  padding-right: 0.2rem;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.72rem;
+}
+
+.overview-item {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.82rem 0.88rem;
+  display: grid;
+  gap: 0.38rem;
+  align-content: start;
+  min-height: 124px;
+}
+
+.overview-index {
+  color: var(--text-subtle);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+}
+
+.overview-item h3,
+.overview-item p {
+  margin: 0;
+}
+
+.overview-item h3 {
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.overview-item p {
+  color: #d9ebff;
+  line-height: 1.42;
+}
+
 .app-hint {
   margin: 0.25rem 0 0;
   text-align: center;
@@ -650,13 +711,23 @@ button {
   padding: 1rem;
 }
 
+@media (max-width: 1080px) {
+  .entry-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .overview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 860px) {
   .stats-ribbon {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .entry-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -731,6 +802,20 @@ button {
     font-size: 1rem;
   }
 
+  .overview-scroll {
+    max-height: 66vh;
+  }
+
+  .overview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+  }
+
+  .overview-item {
+    min-height: 116px;
+    padding: 0.72rem 0.76rem;
+  }
+
   .cta-btn,
   .ghost-btn,
   .quiz-option,
@@ -742,6 +827,10 @@ button {
 
   .entry-mini-actions {
     display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .entry-grid {
     grid-template-columns: 1fr;
   }
 

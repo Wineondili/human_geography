@@ -3,6 +3,7 @@ import { useReducedMotion } from 'framer-motion'
 import AnimatedBackdrop from './components/AnimatedBackdrop'
 import FlashcardStage from './components/FlashcardStage'
 import HeaderHero from './components/HeaderHero'
+import OverviewStage from './components/OverviewStage'
 import QuizStage from './components/QuizStage'
 import StatsRibbon from './components/StatsRibbon'
 import { createQuizQuestion, makeVocabKey, normalizeAnswer, shuffleItems } from './lib/vocab'
@@ -379,9 +380,9 @@ function App() {
         {mode === null ? (
           <section className="entry-panel">
             <p className="entry-kicker">初始化入口</p>
-            <h2 className="entry-title">选择进入学习模式或测试模式</h2>
+            <h2 className="entry-title">选择进入学习、测试或总览模式</h2>
             <p className="entry-copy">
-              学习模式适合翻卡记忆，测试模式会打乱整套词表并要求你键入答案，直到答对才会进入下一题。
+              学习模式适合翻卡记忆，测试模式会打乱整套词表并要求你键入答案，总览模式用于上下滚动浏览整章单词。
             </p>
 
             <div className="entry-grid">
@@ -404,13 +405,23 @@ function App() {
                   </button>
                 </div>
               </article>
+
+              <button onClick={() => enterMode('overview')} type="button" className="entry-card">
+                <span>Overview</span>
+                <strong>查看单词总览</strong>
+                <p>多列展示整章词表，支持上下滚动快速扫一遍。</p>
+              </button>
             </div>
           </section>
         ) : (
           <>
             <section className="session-bar">
               <span className="session-badge">
-                {mode === 'flashcard' ? '当前：学习模式' : '当前：测试模式'}
+                {mode === 'flashcard'
+                  ? '当前：学习模式'
+                  : mode === 'quiz'
+                    ? '当前：测试模式'
+                    : '当前：总览模式'}
               </span>
               <button onClick={returnToHome} type="button" className="text-btn">
                 返回入口
@@ -430,6 +441,8 @@ function App() {
                 onSwitchDirection={switchDirection}
                 motionLevel={motionLevel}
               />
+            ) : mode === 'overview' ? (
+              <OverviewStage items={sourceDeck} motionLevel={motionLevel} />
             ) : (
               <>
                 <QuizStage
