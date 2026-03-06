@@ -24,3 +24,4 @@
 - 2026-03-06 14:16:00 +0800: Simplified study mode into manual card flipping, added ordered/shuffle queue resets for flashcards, and removed the sliding card highlight overlay.
 - 2026-03-06 14:17:17 +0800: Hid the 8-tile stats ribbon in study mode so only the flashcard controls remain visible while keeping quiz statistics unchanged.
 - 2026-03-06 14:18:21 +0800: Removed on-screen shortcut hints from study mode controls while preserving the underlying keyboard shortcuts.
+- 2026-03-06 14:20:27 +0800: Normalized Chinese vocab displays and quiz answers to strip trailing English aliases such as `未知之地（Terra Incognita）`.
