@@ -79,7 +79,7 @@ function FlashcardStage({
             </button>
           </div>
           <button onClick={onSwitchDirection} type="button" className="text-btn">
-            切换方向（R）
+            切换方向
           </button>
         </div>
       </div>
@@ -123,16 +123,16 @@ function FlashcardStage({
 
       <div className="stage-actions">
         <button onClick={onFlip} type="button" className="cta-btn">
-          翻转卡片（空格）
+          翻转卡片
         </button>
       </div>
 
       <div className="stage-nav">
         <button onClick={onPrev} type="button" className="ghost-btn">
-          上一条（←）
+          上一条
         </button>
         <button onClick={onNext} type="button" className="ghost-btn">
-          下一条（→）
+          下一条
         </button>
       </div>
     </motion.section>
