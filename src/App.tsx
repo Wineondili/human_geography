@@ -183,6 +183,19 @@ function App() {
     clearQuizLoopState()
   }, [clearQuizLoopState])
 
+  const setStudyDirection = useCallback(
+    (nextDirection: Direction) => {
+      if (nextDirection === direction) {
+        return
+      }
+
+      setDirection(nextDirection)
+      setShowAnswer(false)
+      clearQuizLoopState()
+    },
+    [clearQuizLoopState, direction],
+  )
+
   const enterMode = useCallback(
     (nextMode: UiState['mode']) => {
       if (quizAdvanceTimerRef.current !== null) {
@@ -421,12 +434,13 @@ function App() {
             ) : (
               <QuizStage
                 question={quizQuestion}
+                direction={direction}
                 inputValue={quizInput}
                 feedbackState={quizFeedback}
                 revealedAnswer={revealedQuizAnswer}
                 onInputChange={handleQuizInputChange}
                 onSubmit={handleQuizSubmit}
-                onSwitchDirection={switchDirection}
+                onDirectionChange={setStudyDirection}
                 motionLevel={motionLevel}
               />
             )}

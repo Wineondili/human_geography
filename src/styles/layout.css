@@ -313,6 +313,31 @@ button {
   justify-content: flex-end;
 }
 
+.direction-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+  padding: 0.24rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.direction-btn {
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-subtle);
+  padding: 0.34rem 0.7rem;
+  cursor: pointer;
+  transition: background var(--dur-fast) ease, color var(--dur-fast) ease, transform var(--dur-fast) ease;
+}
+
+.direction-btn.active {
+  background: rgba(114, 182, 255, 0.22);
+  color: var(--text-main);
+}
+
 .stage-label {
   color: var(--text-subtle);
   font-size: 0.9rem;

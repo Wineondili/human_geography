@@ -2,26 +2,29 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useRef } from 'react'
 import type { QuizFeedback, QuizQuestion } from '../types/quiz'
 import type { MotionLevel } from '../types/ui'
+import type { Direction } from '../types/vocab'
 
 export interface QuizStageProps {
   question: QuizQuestion | null
+  direction: Direction
   inputValue: string
   feedbackState: QuizFeedback
   revealedAnswer: string | null
   onInputChange: (value: string) => void
   onSubmit: () => void
-  onSwitchDirection: () => void
+  onDirectionChange: (direction: Direction) => void
   motionLevel: MotionLevel
 }
 
 function QuizStage({
   question,
+  direction,
   inputValue,
   feedbackState,
   revealedAnswer,
   onInputChange,
   onSubmit,
-  onSwitchDirection,
+  onDirectionChange,
   motionLevel,
 }: QuizStageProps) {
   const animated = motionLevel === 'full'
@@ -49,9 +52,22 @@ function QuizStage({
         <span className="stage-label">{question.promptLabel}</span>
         <div className="stage-head-actions">
           <span className="stage-tip">输入答案后按回车验证</span>
-          <button onClick={onSwitchDirection} type="button" className="text-btn">
-            切换方向（R）
-          </button>
+          <div className="direction-toggle" role="group" aria-label="测试方向">
+            <button
+              onClick={() => onDirectionChange('enToCn')}
+              type="button"
+              className={direction === 'enToCn' ? 'direction-btn active' : 'direction-btn'}
+            >
+              英中
+            </button>
+            <button
+              onClick={() => onDirectionChange('cnToEn')}
+              type="button"
+              className={direction === 'cnToEn' ? 'direction-btn active' : 'direction-btn'}
+            >
+              中英
+            </button>
+          </div>
         </div>
       </div>
 
