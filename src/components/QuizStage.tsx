@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import type { QuizFeedback, QuizQuestion } from '../types/quiz'
 import type { MotionLevel } from '../types/ui'
 import type { Direction } from '../types/vocab'
@@ -29,10 +29,59 @@ function QuizStage({
 }: QuizStageProps) {
   const animated = motionLevel === 'full'
   const inputRef = useRef<HTMLInputElement | null>(null)
+  const focusInput = useCallback(() => {
+    if (!inputRef.current) {
+      return
+    }
+
+    inputRef.current.focus()
+    const length = inputRef.current.value.length
+    inputRef.current.setSelectionRange(length, length)
+  }, [])
 
   useEffect(() => {
-    inputRef.current?.focus()
-  }, [feedbackState, question?.prompt])
+    if (feedbackState === 'correct') {
+      return
+    }
+
+    const rafId = window.requestAnimationFrame(() => {
+      focusInput()
+    })
+
+    return () => {
+      window.cancelAnimationFrame(rafId)
+    }
+  }, [direction, feedbackState, focusInput, question?.prompt])
+
+  useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null
+      const tagName = target?.tagName?.toLowerCase()
+      const isEditable =
+        tagName === 'input' ||
+        tagName === 'textarea' ||
+        target?.isContentEditable === true
+
+      if (isEditable) {
+        return
+      }
+
+      const isFocusShortcut =
+        event.code === 'Slash' && (event.ctrlKey || event.metaKey) && !event.altKey
+
+      if (!isFocusShortcut) {
+        return
+      }
+
+      event.preventDefault()
+      focusInput()
+    }
+
+    window.addEventListener('keydown', handleShortcut)
+    return () => {
+      window.removeEventListener('keydown', handleShortcut)
+    }
+  }, [focusInput])
 
   if (!question) {
     return <section className="stage-panel quiz-stage">当前词量不足，无法开始测试。</section>
@@ -51,7 +100,7 @@ function QuizStage({
       <div className="stage-head">
         <span className="stage-label">{question.promptLabel}</span>
         <div className="stage-head-actions">
-          <span className="stage-tip">输入答案后按回车验证</span>
+          <span className="stage-tip">回车验证，Ctrl+/ 或 Cmd+/ 快速定位输入框</span>
           <div className="direction-toggle" role="group" aria-label="测试方向">
             <button
               onClick={() => onDirectionChange('enToCn')}
@@ -100,6 +149,7 @@ function QuizStage({
                 autoComplete="off"
                 autoCapitalize="off"
                 spellCheck={false}
+                autoFocus
                 disabled={isLocked}
               />
             </label>

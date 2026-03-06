@@ -19,3 +19,4 @@
 - 2026-03-06 11:14:33 +0800: Added a start gate for manual mode selection and rewrote quiz mode as shuffled typed-answer drills with enter-to-submit retry loops.
 - 2026-03-06 11:27:51 +0800: Split quiz direction switching into two compact buttons for direct EN-CN and CN-EN selection.
 - 2026-03-06 11:37:33 +0800: Moved quiz direction choice to the entry screen and made typed-answer validation ignore case, whitespace, and punctuation while treating blank submit as wrong.
+- 2026-03-06 11:39:00 +0800: Strengthened quiz input autofocus and added Ctrl+/ (Cmd+/ on macOS) to quickly refocus the answer field.
