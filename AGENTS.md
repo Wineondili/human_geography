@@ -22,3 +22,4 @@
 - 2026-03-06 11:39:00 +0800: Strengthened quiz input autofocus and added Ctrl+/ (Cmd+/ on macOS) to quickly refocus the answer field.
 - 2026-03-06 11:44:23 +0800: Removed non-study UI copy from the quiz flow, tightened the quiz header/controls, and reordered mobile quiz layout so the answer field stays higher and easier to reach.
 - 2026-03-06 14:16:00 +0800: Simplified study mode into manual card flipping, added ordered/shuffle queue resets for flashcards, and removed the sliding card highlight overlay.
+- 2026-03-06 14:17:17 +0800: Hid the 8-tile stats ribbon in study mode so only the flashcard controls remain visible while keeping quiz statistics unchanged.

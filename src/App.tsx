@@ -418,30 +418,18 @@ function App() {
             </section>
 
             {mode === 'flashcard' ? (
-              <>
-                <StatsRibbon
-                  progress={progress}
-                  reviewedRate={reviewedRate}
-                  masteryRate={masteryRate}
-                  quizAccuracy={quizAccuracy}
-                  quizCorrect={quizCorrect}
-                  quizWrong={quizWrong}
-                  motionLevel={motionLevel}
-                />
-
-                <FlashcardStage
-                  current={current}
-                  direction={direction}
-                  showAnswer={showAnswer}
-                  queueMode={studyQueueMode}
-                  onFlip={reveal}
-                  onPrev={movePrev}
-                  onNext={moveNext}
-                  onQueueModeChange={refreshStudyDeck}
-                  onSwitchDirection={switchDirection}
-                  motionLevel={motionLevel}
-                />
-              </>
+              <FlashcardStage
+                current={current}
+                direction={direction}
+                showAnswer={showAnswer}
+                queueMode={studyQueueMode}
+                onFlip={reveal}
+                onPrev={movePrev}
+                onNext={moveNext}
+                onQueueModeChange={refreshStudyDeck}
+                onSwitchDirection={switchDirection}
+                motionLevel={motionLevel}
+              />
             ) : (
               <>
                 <QuizStage
