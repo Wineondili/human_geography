@@ -20,3 +20,4 @@
 - 2026-03-06 11:27:51 +0800: Split quiz direction switching into two compact buttons for direct EN-CN and CN-EN selection.
 - 2026-03-06 11:37:33 +0800: Moved quiz direction choice to the entry screen and made typed-answer validation ignore case, whitespace, and punctuation while treating blank submit as wrong.
 - 2026-03-06 11:39:00 +0800: Strengthened quiz input autofocus and added Ctrl+/ (Cmd+/ on macOS) to quickly refocus the answer field.
+- 2026-03-06 11:44:23 +0800: Removed non-study UI copy from the quiz flow, tightened the quiz header/controls, and reordered mobile quiz layout so the answer field stays higher and easier to reach.

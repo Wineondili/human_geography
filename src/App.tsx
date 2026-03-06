@@ -8,7 +8,6 @@ import StatsRibbon from './components/StatsRibbon'
 import { createQuizQuestion, makeVocabKey, normalizeAnswer, shuffleItems } from './lib/vocab'
 import { getInitialProgress, getMasteryRate, getReviewedRate, recordAttempt, saveProgress } from './lib/storage'
 import type { QuizFeedback, QuizQuestion } from './types/quiz'
-import { STORAGE_KEY } from './types/vocab'
 import type { Direction, ProgressRecord, VocabItem } from './types/vocab'
 import type { MotionLevel, UiState } from './types/ui'
 
@@ -100,7 +99,6 @@ function App() {
   const quizQuestion: QuizQuestion | null = currentQuizWord
     ? createQuizQuestion(currentQuizWord, direction)
     : null
-  const totalWords = deck.length
 
   const masteryRate = getMasteryRate(progress, keys)
   const reviewedRate = getReviewedRate(progress, keys)
@@ -373,8 +371,8 @@ function App() {
     <main className={`app-shell motion-${motionLevel}`}>
       <AnimatedBackdrop motionLevel={motionLevel} />
 
-      <div className="app-content">
-        <HeaderHero totalWords={totalWords} motionLevel={motionLevel} />
+      <div className={mode === 'quiz' ? 'app-content quiz-layout' : 'app-content'}>
+        <HeaderHero motionLevel={motionLevel} />
 
         {mode === null ? (
           <section className="entry-panel">
@@ -394,7 +392,7 @@ function App() {
               <article className="entry-card entry-card-static">
                 <span>Test</span>
                 <strong>进入测试模式</strong>
-                <p>整轮 shuffle，输入答案，回车验证，直到答对。</p>
+                <p>整轮 shuffle，输入答案，直到答对才进入下一题。</p>
                 <div className="entry-mini-actions">
                   <button onClick={() => enterMode('quiz', 'enToCn')} type="button" className="entry-mini-btn">
                     英中
@@ -417,45 +415,57 @@ function App() {
               </button>
             </section>
 
-            <StatsRibbon
-              progress={progress}
-              reviewedRate={reviewedRate}
-              masteryRate={masteryRate}
-              quizAccuracy={quizAccuracy}
-              quizCorrect={quizCorrect}
-              quizWrong={quizWrong}
-              motionLevel={motionLevel}
-            />
-
             {mode === 'flashcard' ? (
-              <FlashcardStage
-                current={current}
-                direction={direction}
-                showAnswer={showAnswer}
-                onReveal={reveal}
-                onRemember={handleRemember}
-                onPrev={movePrev}
-                onNext={moveNext}
-                onSwitchDirection={switchDirection}
-                motionLevel={motionLevel}
-              />
+              <>
+                <StatsRibbon
+                  progress={progress}
+                  reviewedRate={reviewedRate}
+                  masteryRate={masteryRate}
+                  quizAccuracy={quizAccuracy}
+                  quizCorrect={quizCorrect}
+                  quizWrong={quizWrong}
+                  motionLevel={motionLevel}
+                />
+
+                <FlashcardStage
+                  current={current}
+                  direction={direction}
+                  showAnswer={showAnswer}
+                  onReveal={reveal}
+                  onRemember={handleRemember}
+                  onPrev={movePrev}
+                  onNext={moveNext}
+                  onSwitchDirection={switchDirection}
+                  motionLevel={motionLevel}
+                />
+              </>
             ) : (
-              <QuizStage
-                question={quizQuestion}
-                direction={direction}
-                inputValue={quizInput}
-                feedbackState={quizFeedback}
-                revealedAnswer={revealedQuizAnswer}
-                onInputChange={handleQuizInputChange}
-                onSubmit={handleQuizSubmit}
-                onDirectionChange={setStudyDirection}
-                motionLevel={motionLevel}
-              />
+              <>
+                <QuizStage
+                  question={quizQuestion}
+                  direction={direction}
+                  inputValue={quizInput}
+                  feedbackState={quizFeedback}
+                  revealedAnswer={revealedQuizAnswer}
+                  onInputChange={handleQuizInputChange}
+                  onSubmit={handleQuizSubmit}
+                  onDirectionChange={setStudyDirection}
+                  motionLevel={motionLevel}
+                />
+
+                <StatsRibbon
+                  progress={progress}
+                  reviewedRate={reviewedRate}
+                  masteryRate={masteryRate}
+                  quizAccuracy={quizAccuracy}
+                  quizCorrect={quizCorrect}
+                  quizWrong={quizWrong}
+                  motionLevel={motionLevel}
+                />
+              </>
             )}
           </>
         )}
-
-        <p className="app-hint">当前进度（localStorage key: {STORAGE_KEY}）</p>
       </div>
     </main>
   )

@@ -88,7 +88,7 @@ function QuizStage({
   }
 
   const isLocked = feedbackState === 'correct'
-  const inputPlaceholder = question.answerLabel === '答案（中文）' ? '输入中文答案，回车验证' : 'Type the English answer and press Enter'
+  const inputPlaceholder = question.answerLabel === '答案（中文）' ? '输入中文答案' : 'Type the English answer'
 
   return (
     <motion.section
@@ -100,7 +100,6 @@ function QuizStage({
       <div className="stage-head">
         <span className="stage-label">{question.promptLabel}</span>
         <div className="stage-head-actions">
-          <span className="stage-tip">回车验证，Ctrl+/ 或 Cmd+/ 快速定位输入框</span>
           <div className="direction-toggle" role="group" aria-label="测试方向">
             <button
               onClick={() => onDirectionChange('enToCn')}
@@ -154,7 +153,7 @@ function QuizStage({
               />
             </label>
             <button type="submit" className="cta-btn" disabled={isLocked}>
-              回车提交
+              提交
             </button>
           </form>
         </motion.div>
