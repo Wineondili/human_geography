@@ -1,18 +1,19 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import type { MouseEvent } from 'react'
 import { getPromptAndAnswer } from '../lib/vocab'
-import type { Direction, VocabItem } from '../types/vocab'
+import type { Direction, StudyQueueMode, VocabItem } from '../types/vocab'
 import type { MotionLevel } from '../types/ui'
 
 export interface FlashcardStageProps {
   current: VocabItem
   direction: Direction
   showAnswer: boolean
-  onReveal: () => void
-  onRemember: (known: boolean) => void
+  queueMode: StudyQueueMode
+  onFlip: () => void
   onPrev: () => void
   onNext: () => void
+  onQueueModeChange: (queueMode: StudyQueueMode) => void
   onSwitchDirection: () => void
   motionLevel: MotionLevel
 }
@@ -21,26 +22,17 @@ function FlashcardStage({
   current,
   direction,
   showAnswer,
-  onReveal,
-  onRemember,
+  queueMode,
+  onFlip,
   onPrev,
   onNext,
+  onQueueModeChange,
   onSwitchDirection,
   motionLevel,
 }: FlashcardStageProps) {
   const base = getPromptAndAnswer(current, direction)
   const animated = motionLevel === 'full'
   const [tilt, setTilt] = useState({ x: 0, y: 0 })
-  const [feedbackFx, setFeedbackFx] = useState<'idle' | 'known' | 'unknown'>('idle')
-  const timerRef = useRef<number | null>(null)
-
-  useEffect(() => {
-    return () => {
-      if (timerRef.current !== null) {
-        window.clearTimeout(timerRef.current)
-      }
-    }
-  }, [])
 
   const handlePointerMove = (event: MouseEvent<HTMLDivElement>) => {
     if (!animated) {
@@ -60,35 +52,36 @@ function FlashcardStage({
     setTilt({ x: 0, y: 0 })
   }
 
-  const handleRememberClick = (known: boolean) => {
-    if (!animated) {
-      onRemember(known)
-      return
-    }
-
-    setFeedbackFx(known ? 'known' : 'unknown')
-    if (timerRef.current !== null) {
-      window.clearTimeout(timerRef.current)
-    }
-
-    timerRef.current = window.setTimeout(() => {
-      onRemember(known)
-      setFeedbackFx('idle')
-    }, 170)
-  }
-
   return (
     <motion.section
-      className={`stage-panel flashcard-stage${feedbackFx === 'known' ? ' fx-known' : ''}${feedbackFx === 'unknown' ? ' fx-unknown' : ''}`}
+      className="stage-panel flashcard-stage"
       initial={animated ? { opacity: 0, y: 24 } : false}
       animate={animated ? { opacity: 1, y: 0 } : undefined}
       transition={{ duration: 0.58, ease: 'easeOut' }}
     >
       <div className="stage-head">
         <span className="stage-label">{base.promptLabel}</span>
-        <button onClick={onSwitchDirection} type="button" className="text-btn">
-          切换方向（R）
-        </button>
+        <div className="stage-head-actions">
+          <div className="direction-toggle" role="group" aria-label="学习顺序">
+            <button
+              onClick={() => onQueueModeChange('ordered')}
+              type="button"
+              className={queueMode === 'ordered' ? 'direction-btn active' : 'direction-btn'}
+            >
+              顺序
+            </button>
+            <button
+              onClick={() => onQueueModeChange('shuffle')}
+              type="button"
+              className={queueMode === 'shuffle' ? 'direction-btn active' : 'direction-btn'}
+            >
+              Shuffle
+            </button>
+          </div>
+          <button onClick={onSwitchDirection} type="button" className="text-btn">
+            切换方向（R）
+          </button>
+        </div>
       </div>
 
       {animated ? (
@@ -129,20 +122,9 @@ function FlashcardStage({
       )}
 
       <div className="stage-actions">
-        {!showAnswer ? (
-          <button onClick={onReveal} type="button" className="cta-btn">
-            显示答案（空格）
-          </button>
-        ) : (
-          <>
-            <button onClick={() => handleRememberClick(true)} type="button" className="cta-btn success">
-              认识（1 / 空格）
-            </button>
-            <button onClick={() => handleRememberClick(false)} type="button" className="cta-btn danger">
-              未记住（2）
-            </button>
-          </>
-        )}
+        <button onClick={onFlip} type="button" className="cta-btn">
+          翻转卡片（空格）
+        </button>
       </div>
 
       <div className="stage-nav">

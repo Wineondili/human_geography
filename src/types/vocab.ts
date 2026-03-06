@@ -1,4 +1,5 @@
 export type Direction = 'enToCn' | 'cnToEn'
+export type StudyQueueMode = 'ordered' | 'shuffle'
 
 export interface VocabItem {
   en: string

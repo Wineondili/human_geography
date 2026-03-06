@@ -1,12 +1,3 @@
-@keyframes sheenMove {
-  0% {
-    transform: translateX(-120%) rotate(8deg);
-  }
-  100% {
-    transform: translateX(220%) rotate(8deg);
-  }
-}
-
 @keyframes tilePulse {
   0%,
   100% {
@@ -26,36 +17,6 @@
   }
   100% {
     opacity: 0.35;
-  }
-}
-
-@keyframes successGlow {
-  0% {
-    box-shadow: 0 0 0 0 rgba(103, 217, 162, 0.35);
-  }
-  70% {
-    box-shadow: 0 0 0 14px rgba(103, 217, 162, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(103, 217, 162, 0);
-  }
-}
-
-@keyframes failShake {
-  0% {
-    transform: translateX(0);
-  }
-  20% {
-    transform: translateX(-6px);
-  }
-  45% {
-    transform: translateX(5px);
-  }
-  70% {
-    transform: translateX(-3px);
-  }
-  100% {
-    transform: translateX(0);
   }
 }
 
@@ -89,32 +50,12 @@
   }
 }
 
-.stage-panel::after {
-  content: '';
-  position: absolute;
-  inset: -40% auto -40% -35%;
-  width: 42%;
-  background: linear-gradient(110deg, transparent 0%, rgba(255, 255, 255, 0.13) 50%, transparent 100%);
-  pointer-events: none;
-  animation: sheenMove 5.4s linear infinite;
-  opacity: 0.6;
-  will-change: transform;
-}
-
 .stat-tile {
   animation: tilePulse 5.2s ease-in-out infinite;
 }
 
 .hero-chip {
   animation: shimmer 4s ease-in-out infinite;
-}
-
-.flashcard-stage.fx-known {
-  animation: successGlow 360ms ease-out;
-}
-
-.flashcard-stage.fx-unknown {
-  animation: failShake 320ms ease;
 }
 
 .quiz-option.pulse {
@@ -125,11 +66,8 @@
   animation: optionShake 300ms ease;
 }
 
-.motion-reduced .stage-panel::after,
 .motion-reduced .stat-tile,
 .motion-reduced .hero-chip,
-.motion-reduced .flashcard-stage.fx-known,
-.motion-reduced .flashcard-stage.fx-unknown,
 .motion-reduced .quiz-option.pulse,
 .motion-reduced .quiz-option.shake {
   animation: none !important;
@@ -141,11 +79,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .stage-panel::after,
   .stat-tile,
   .hero-chip,
-  .flashcard-stage.fx-known,
-  .flashcard-stage.fx-unknown,
   .quiz-option.pulse,
   .quiz-option.shake {
     animation: none !important;

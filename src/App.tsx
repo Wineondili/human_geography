@@ -8,7 +8,7 @@ import StatsRibbon from './components/StatsRibbon'
 import { createQuizQuestion, makeVocabKey, normalizeAnswer, shuffleItems } from './lib/vocab'
 import { getInitialProgress, getMasteryRate, getReviewedRate, recordAttempt, saveProgress } from './lib/storage'
 import type { QuizFeedback, QuizQuestion } from './types/quiz'
-import type { Direction, ProgressRecord, VocabItem } from './types/vocab'
+import type { Direction, ProgressRecord, StudyQueueMode, VocabItem } from './types/vocab'
 import type { MotionLevel, UiState } from './types/ui'
 
 function App() {
@@ -16,10 +16,12 @@ function App() {
   const motionLevel: MotionLevel = prefersReducedMotion ? 'reduced' : 'full'
 
   const [mode, setMode] = useState<UiState['mode'] | null>(null)
+  const [sourceDeck, setSourceDeck] = useState<VocabItem[]>([])
   const [deck, setDeck] = useState<VocabItem[]>([])
   const [index, setIndex] = useState(0)
   const [showAnswer, setShowAnswer] = useState(false)
   const [direction, setDirection] = useState<Direction>('enToCn')
+  const [studyQueueMode, setStudyQueueMode] = useState<StudyQueueMode>('ordered')
   const [progress, setProgress] = useState<ProgressRecord>(() => getInitialProgress())
   const [quizDeck, setQuizDeck] = useState<VocabItem[]>([])
   const [quizIndex, setQuizIndex] = useState(0)
@@ -31,6 +33,10 @@ function App() {
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [errorMessage, setErrorMessage] = useState('')
   const quizAdvanceTimerRef = useRef<number | null>(null)
+
+  const buildStudyDeck = useCallback((items: VocabItem[], queueMode: StudyQueueMode) => {
+    return queueMode === 'shuffle' ? shuffleItems(items) : [...items]
+  }, [])
 
   useEffect(() => {
     return () => {
@@ -76,7 +82,8 @@ function App() {
           return
         }
 
-        setDeck(shuffleItems(vocab))
+        setSourceDeck(vocab)
+        setDeck(buildStudyDeck(vocab, 'ordered'))
         setIndex(0)
         setShowAnswer(false)
         setStatus('ready')
@@ -91,9 +98,9 @@ function App() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [buildStudyDeck])
 
-  const keys = useMemo(() => deck.map((item) => makeVocabKey(item)), [deck])
+  const keys = useMemo(() => sourceDeck.map((item) => makeVocabKey(item)), [sourceDeck])
   const current = deck[index]
   const currentQuizWord = quizDeck[quizIndex]
   const quizQuestion: QuizQuestion | null = currentQuizWord
@@ -118,17 +125,35 @@ function App() {
   }, [])
 
   const startQuizRun = useCallback(() => {
-    if (!deck.length) {
+    if (!sourceDeck.length) {
       setQuizDeck([])
       setQuizIndex(0)
       clearQuizLoopState()
       return
     }
 
-    setQuizDeck(shuffleItems(deck))
+    setQuizDeck(shuffleItems(sourceDeck))
     setQuizIndex(0)
     clearQuizLoopState()
-  }, [clearQuizLoopState, deck])
+  }, [clearQuizLoopState, sourceDeck])
+
+  const refreshStudyDeck = useCallback(
+    (nextQueueMode: StudyQueueMode) => {
+      setStudyQueueMode(nextQueueMode)
+
+      if (!sourceDeck.length) {
+        setDeck([])
+        setIndex(0)
+        setShowAnswer(false)
+        return
+      }
+
+      setDeck(buildStudyDeck(sourceDeck, nextQueueMode))
+      setIndex(0)
+      setShowAnswer(false)
+    },
+    [buildStudyDeck, sourceDeck],
+  )
 
   const moveNext = useCallback(() => {
     if (!deck.length) {
@@ -139,12 +164,14 @@ function App() {
     setIndex((prev) => {
       const atEnd = prev >= deck.length - 1
       if (atEnd) {
-        setDeck((currentDeck) => shuffleItems(currentDeck))
+        if (studyQueueMode === 'shuffle') {
+          setDeck((currentDeck) => shuffleItems(currentDeck))
+        }
         return 0
       }
       return prev + 1
     })
-  }, [deck.length])
+  }, [deck.length, studyQueueMode])
 
   const movePrev = useCallback(() => {
     if (!deck.length) {
@@ -172,7 +199,7 @@ function App() {
   }, [clearQuizLoopState, quizDeck.length])
 
   const reveal = useCallback(() => {
-    setShowAnswer(true)
+    setShowAnswer((previous) => !previous)
   }, [])
 
   const switchDirection = useCallback(() => {
@@ -226,23 +253,6 @@ function App() {
     setShowAnswer(false)
     clearQuizLoopState()
   }, [clearQuizLoopState])
-
-  const handleRemember = useCallback(
-    (known: boolean) => {
-      if (!current) {
-        return
-      }
-
-      const key = makeVocabKey(current)
-      setProgress((previous) => {
-        const next = recordAttempt(previous, key, known)
-        persistProgress(next)
-        return next
-      })
-      moveNext()
-    },
-    [current, moveNext, persistProgress],
-  )
 
   const handleQuizInputChange = useCallback(
     (value: string) => {
@@ -299,7 +309,7 @@ function App() {
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
       const tag = (event.target as HTMLElement)?.tagName?.toLowerCase()
-      if (tag === 'input' || tag === 'textarea') {
+      if (tag === 'input' || tag === 'textarea' || tag === 'button' || tag === 'select') {
         return
       }
 
@@ -318,11 +328,7 @@ function App() {
 
       if (event.key === ' ') {
         event.preventDefault()
-        if (!showAnswer) {
-          reveal()
-        } else {
-          handleRemember(true)
-        }
+        reveal()
         return
       }
 
@@ -332,10 +338,6 @@ function App() {
       } else if (event.key === 'ArrowLeft') {
         event.preventDefault()
         movePrev()
-      } else if (event.key === '1' && showAnswer) {
-        handleRemember(true)
-      } else if (event.key === '2' && showAnswer) {
-        handleRemember(false)
       }
     }
 
@@ -343,7 +345,7 @@ function App() {
     return () => {
       window.removeEventListener('keydown', handler)
     }
-  }, [handleRemember, mode, moveNext, movePrev, reveal, showAnswer, switchDirection])
+  }, [mode, moveNext, movePrev, reveal, switchDirection])
 
   if (status === 'loading') {
     return (
@@ -431,10 +433,11 @@ function App() {
                   current={current}
                   direction={direction}
                   showAnswer={showAnswer}
-                  onReveal={reveal}
-                  onRemember={handleRemember}
+                  queueMode={studyQueueMode}
+                  onFlip={reveal}
                   onPrev={movePrev}
                   onNext={moveNext}
+                  onQueueModeChange={refreshStudyDeck}
                   onSwitchDirection={switchDirection}
                   motionLevel={motionLevel}
                 />
