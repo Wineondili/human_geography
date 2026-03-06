@@ -197,10 +197,14 @@ function App() {
   )
 
   const enterMode = useCallback(
-    (nextMode: UiState['mode']) => {
+    (nextMode: UiState['mode'], nextDirection?: Direction) => {
       if (quizAdvanceTimerRef.current !== null) {
         window.clearTimeout(quizAdvanceTimerRef.current)
         quizAdvanceTimerRef.current = null
+      }
+
+      if (nextDirection) {
+        setDirection(nextDirection)
       }
 
       setMode(nextMode)
@@ -261,10 +265,6 @@ function App() {
     }
 
     const submittedAnswer = normalizeAnswer(quizInput)
-    if (!submittedAnswer) {
-      return
-    }
-
     const correctAnswer = normalizeAnswer(quizQuestion.answer)
     const isCorrect = submittedAnswer === correctAnswer
     const key = makeVocabKey(quizQuestion.word)
@@ -391,11 +391,19 @@ function App() {
                 <p>按节奏翻卡、展示答案、继续推进。</p>
               </button>
 
-              <button onClick={() => enterMode('quiz')} type="button" className="entry-card">
+              <article className="entry-card entry-card-static">
                 <span>Test</span>
                 <strong>进入测试模式</strong>
                 <p>整轮 shuffle，输入答案，回车验证，直到答对。</p>
-              </button>
+                <div className="entry-mini-actions">
+                  <button onClick={() => enterMode('quiz', 'enToCn')} type="button" className="entry-mini-btn">
+                    英中
+                  </button>
+                  <button onClick={() => enterMode('quiz', 'cnToEn')} type="button" className="entry-mini-btn">
+                    中英
+                  </button>
+                </div>
+              </article>
             </div>
           </section>
         ) : (

@@ -41,5 +41,8 @@ export const createQuizQuestion = (item: VocabItem, direction: Direction): QuizQ
 }
 
 export const normalizeAnswer = (value: string): string => {
-  return value.replace(/\u3000/g, ' ').trim().replace(/\s+/g, ' ').toLowerCase()
+  return value
+    .normalize('NFKC')
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, '')
 }

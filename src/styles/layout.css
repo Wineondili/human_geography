@@ -183,6 +183,10 @@ button {
   cursor: pointer;
 }
 
+.entry-card-static {
+  cursor: default;
+}
+
 .entry-card span {
   color: var(--text-subtle);
   font-size: 0.82rem;
@@ -198,6 +202,29 @@ button {
   margin: 0;
   color: var(--text-subtle);
   line-height: 1.45;
+}
+
+.entry-mini-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+}
+
+.entry-mini-btn {
+  flex: 1;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(114, 182, 255, 0.12);
+  color: var(--text-main);
+  padding: 0.58rem 0.8rem;
+  cursor: pointer;
+  transition: background var(--dur-fast) ease, transform var(--dur-fast) ease, border-color var(--dur-fast) ease;
+}
+
+.entry-mini-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(114, 182, 255, 0.18);
+  border-color: rgba(114, 182, 255, 0.45);
 }
 
 .session-bar {
@@ -641,8 +668,14 @@ button {
   .ghost-btn,
   .quiz-option,
   .tab-btn,
-  .entry-card {
+  .entry-card,
+  .entry-mini-btn {
     width: 100%;
+  }
+
+  .entry-mini-actions {
+    display: grid;
+    grid-template-columns: 1fr;
   }
 
   .tab-indicator {
