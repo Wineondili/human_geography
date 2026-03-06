@@ -12,6 +12,8 @@ export interface QuizStageProps {
   revealedAnswer: string | null
   onInputChange: (value: string) => void
   onSubmit: () => void
+  onPrev: () => void
+  onNext: () => void
   onDirectionChange: (direction: Direction) => void
   motionLevel: MotionLevel
 }
@@ -24,6 +26,8 @@ function QuizStage({
   revealedAnswer,
   onInputChange,
   onSubmit,
+  onPrev,
+  onNext,
   onDirectionChange,
   motionLevel,
 }: QuizStageProps) {
@@ -55,6 +59,22 @@ function QuizStage({
 
   useEffect(() => {
     const handleShortcut = (event: KeyboardEvent) => {
+      const isMoveShortcut =
+        (event.key === 'ArrowLeft' || event.key === 'ArrowRight') &&
+        !event.altKey &&
+        !event.ctrlKey &&
+        !event.metaKey
+
+      if (isMoveShortcut) {
+        event.preventDefault()
+        if (event.key === 'ArrowLeft') {
+          onPrev()
+        } else {
+          onNext()
+        }
+        return
+      }
+
       const target = event.target as HTMLElement | null
       const tagName = target?.tagName?.toLowerCase()
       const isEditable =
@@ -81,7 +101,7 @@ function QuizStage({
     return () => {
       window.removeEventListener('keydown', handleShortcut)
     }
-  }, [focusInput])
+  }, [focusInput, onNext, onPrev])
 
   if (!question) {
     return <section className="stage-panel quiz-stage">当前词量不足，无法开始测试。</section>

@@ -26,3 +26,4 @@
 - 2026-03-06 14:18:21 +0800: Removed on-screen shortcut hints from study mode controls while preserving the underlying keyboard shortcuts.
 - 2026-03-06 14:20:27 +0800: Normalized Chinese vocab displays and quiz answers to strip trailing English aliases such as `未知之地（Terra Incognita）`.
 - 2026-03-06 14:24:32 +0800: Added an overview mode entry with a vertically scrollable multi-column chapter vocab list that keeps at least two columns on mobile.
+- 2026-03-06 14:47:49 +0800: Added left/right keyboard navigation for quiz items and relaxed English quiz answer matching so ordinary plural terms accept singular input while fixed forms like GIS/GPS expansions still require the canonical plural.

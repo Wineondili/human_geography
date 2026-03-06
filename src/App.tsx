@@ -6,7 +6,7 @@ import HeaderHero from './components/HeaderHero'
 import OverviewStage from './components/OverviewStage'
 import QuizStage from './components/QuizStage'
 import StatsRibbon from './components/StatsRibbon'
-import { createQuizQuestion, makeVocabKey, normalizeAnswer, shuffleItems } from './lib/vocab'
+import { createQuizQuestion, getAcceptedAnswerForms, makeVocabKey, normalizeAnswer, shuffleItems } from './lib/vocab'
 import { getInitialProgress, getMasteryRate, getReviewedRate, recordAttempt, saveProgress } from './lib/storage'
 import type { QuizFeedback, QuizQuestion } from './types/quiz'
 import type { Direction, ProgressRecord, StudyQueueMode, VocabItem } from './types/vocab'
@@ -125,6 +125,13 @@ function App() {
     setRevealedQuizAnswer(null)
   }, [])
 
+  const clearQuizAdvanceTimer = useCallback(() => {
+    if (quizAdvanceTimerRef.current !== null) {
+      window.clearTimeout(quizAdvanceTimerRef.current)
+      quizAdvanceTimerRef.current = null
+    }
+  }, [])
+
   const startQuizRun = useCallback(() => {
     if (!sourceDeck.length) {
       setQuizDeck([])
@@ -199,6 +206,33 @@ function App() {
     })
   }, [clearQuizLoopState, quizDeck.length])
 
+  const moveQuizBy = useCallback(
+    (step: 1 | -1) => {
+      if (!quizDeck.length) {
+        return
+      }
+
+      clearQuizAdvanceTimer()
+      clearQuizLoopState()
+      setQuizIndex((prev) => {
+        if (step === 1) {
+          return prev >= quizDeck.length - 1 ? 0 : prev + 1
+        }
+
+        return prev === 0 ? quizDeck.length - 1 : prev - 1
+      })
+    },
+    [clearQuizAdvanceTimer, clearQuizLoopState, quizDeck.length],
+  )
+
+  const moveQuizPrev = useCallback(() => {
+    moveQuizBy(-1)
+  }, [moveQuizBy])
+
+  const moveQuizNext = useCallback(() => {
+    moveQuizBy(1)
+  }, [moveQuizBy])
+
   const reveal = useCallback(() => {
     setShowAnswer((previous) => !previous)
   }, [])
@@ -224,10 +258,7 @@ function App() {
 
   const enterMode = useCallback(
     (nextMode: UiState['mode'], nextDirection?: Direction) => {
-      if (quizAdvanceTimerRef.current !== null) {
-        window.clearTimeout(quizAdvanceTimerRef.current)
-        quizAdvanceTimerRef.current = null
-      }
+      clearQuizAdvanceTimer()
 
       if (nextDirection) {
         setDirection(nextDirection)
@@ -241,19 +272,15 @@ function App() {
 
       setShowAnswer(false)
     },
-    [startQuizRun],
+    [clearQuizAdvanceTimer, startQuizRun],
   )
 
   const returnToHome = useCallback(() => {
-    if (quizAdvanceTimerRef.current !== null) {
-      window.clearTimeout(quizAdvanceTimerRef.current)
-      quizAdvanceTimerRef.current = null
-    }
-
+    clearQuizAdvanceTimer()
     setMode(null)
     setShowAnswer(false)
     clearQuizLoopState()
-  }, [clearQuizLoopState])
+  }, [clearQuizAdvanceTimer, clearQuizLoopState])
 
   const handleQuizInputChange = useCallback(
     (value: string) => {
@@ -274,8 +301,8 @@ function App() {
     }
 
     const submittedAnswer = normalizeAnswer(quizInput)
-    const correctAnswer = normalizeAnswer(quizQuestion.answer)
-    const isCorrect = submittedAnswer === correctAnswer
+    const acceptedAnswers = getAcceptedAnswerForms(quizQuestion.answer)
+    const isCorrect = acceptedAnswers.includes(submittedAnswer)
     const key = makeVocabKey(quizQuestion.word)
 
     setProgress((previous) => {
@@ -290,9 +317,7 @@ function App() {
       setQuizInput('')
       setRevealedQuizAnswer(null)
 
-      if (quizAdvanceTimerRef.current !== null) {
-        window.clearTimeout(quizAdvanceTimerRef.current)
-      }
+      clearQuizAdvanceTimer()
 
       quizAdvanceTimerRef.current = window.setTimeout(() => {
         advanceQuizWord()
@@ -305,7 +330,7 @@ function App() {
     setQuizFeedback('wrong')
     setRevealedQuizAnswer(quizQuestion.answer)
     setQuizInput('')
-  }, [advanceQuizWord, persistProgress, quizInput, quizQuestion])
+  }, [advanceQuizWord, clearQuizAdvanceTimer, persistProgress, quizInput, quizQuestion])
 
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
@@ -453,6 +478,8 @@ function App() {
                   revealedAnswer={revealedQuizAnswer}
                   onInputChange={handleQuizInputChange}
                   onSubmit={handleQuizSubmit}
+                  onPrev={moveQuizPrev}
+                  onNext={moveQuizNext}
                   onDirectionChange={setStudyDirection}
                   motionLevel={motionLevel}
                 />
